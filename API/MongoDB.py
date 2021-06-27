@@ -23,7 +23,7 @@ class MongoDB:
     def connect(self):
         try:
             self.client = MongoClient(self.host, self.port)
-        except Exception as e:
+        except Exception:
             MongoDB.log.info(f"Couldn't establish connection for {self.host}\n")
 
     def list_database_names(self):
