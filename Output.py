@@ -16,7 +16,7 @@ def valid_file(filepath, option, log):  # sourcery skip: merge-nested-ifs
             exit()
 
 
-_suffixes = ['bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+_suffixes = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
 
 def human_readable_size(size):
@@ -49,7 +49,7 @@ class Output:
         self.output_manager()
 
     def output_manager(self):
-        if self.silent:
+        if not self.silent:
             self.terminal_output()
         if self.output:
             self.write()
@@ -82,7 +82,7 @@ class Output:
     def write(self):
         if self.format_ == "TXT":
             with open(f"{self.filename}.txt", "a+") as f:
-                f.write(f"{self.sep}\n")
+                f.write(f"{'^' * 110}\n")
                 for key, value in self.data_to_write.items():
                     if isinstance(value, list):
                         value = ", ".join(value)
