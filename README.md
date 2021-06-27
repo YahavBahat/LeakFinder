@@ -7,7 +7,7 @@
 2. Implement a threading option.
 3. Disable APIs logging.
 4. If authentication fails:
-  - Authenticate with a default password.
+  - Add an option to authenticate with a default password.
   - Add an option to brute force from a wordlist.
 5. Refactor, comment, and clean code.
 6. Add arguments to the Module instance using dictionary/config file.
