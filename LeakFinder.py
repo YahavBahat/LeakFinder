@@ -4,7 +4,7 @@ from Output import Output, valid_file
 from Filter import Filter
 from datetime import datetime
 from Logging import log_setup
-
+from concurrent.futures import ThreadPoolExecutor
 
 log = log_setup(__name__)
 cluster_ip = {"3306": "MySQL", "27017": "MongoDB", "9200": "ElasticSearch"}
@@ -53,27 +53,7 @@ def info_builder(host, port, cluster_obj, filter_obj, module_name):
     return info
 
 
-@click.command()
-@click.option("--hosts-file", "-h", help="Path to filename with hosts [IP:PORT] format, separated by a newline.",
-              required=True)
-@click.option("--patterns", "-p", help="Filter clusters by regex patterns."
-                                       " Path to regex patterns file, each pattern separated by a newline.")
-@click.option("--match-against", "-m", help="Where to match regex patterns.", type=click.Choice(
-    ["Databases names", "Documents names", "All"], case_sensitive=False), default="All")
-@click.option("--size", "-s", help="Filter clusters by size (in bytes)."
-                                   " For example, to filter clusters bigger than 10MB you would pass: {'bigger': "
-                                   "10000000}. To filter clusters bigger than 10MB but smaller than 100MB you would "
-                                   "pass: {'bigger': 10000000, 'smaller': 100000000}.", type=str)
-@click.option("--output", "-o", is_flag=True, help="Output to file.")
-@click.option("--format", "-f", "format_", help="Output file name format.", type=click.Choice(
-    ["JSONLINES", "CSV", "TXT"], case_sensitive=False), default="TXT")
-@click.option("--exclude-unmatched", "-eu", is_flag=True, help="Exclude non-matching clusters in output.")
-@click.option("--include-geo", "-ig", is_flag=True, help="Include the IP country in output.")
-@click.option("--silent", is_flag=True, help="No terminal output.")
 def main(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, silent):
-    valid_file(patterns, "patterns", log)
-    valid_file(hosts_file, "hosts_file", log)
-
     for line in read_gen(hosts_file):
         line = line.strip().split(":")
         host, port = line[0], int(line[1])
@@ -90,6 +70,34 @@ def main(hosts_file, patterns, match_against, size, output, format_, exclude_unm
             log.info(f"Couldn't establish connection for {host}\n")
 
 
+@click.command()
+@click.option("--hosts-file", "-h", help="Path to filename with hosts [IP:PORT] format, separated by a newline.",
+              required=True)
+@click.option("--patterns", "-p", help="Filter clusters by regex patterns."
+                                       " Path to regex patterns file, each pattern separated by a newline.")
+@click.option("--match-against", "-m", help="Where to match regex patterns.", type=click.Choice(
+    ["Databases names", "Documents names", "All"], case_sensitive=False), default="All")
+@click.option("--size", "-s", help="Filter clusters by size (in bytes)."
+                                   " For example, to filter clusters bigger than 10MB you would pass: {'bigger': "
+                                   "10000000}. To filter clusters bigger than 10MB but smaller than 100MB you would "
+                                   "pass: {'bigger': 10000000, 'smaller': 100000000}.", type=str)
+@click.option("--output", "-o", is_flag=True, help="Output to file.")
+@click.option("--format", "-f", "format_", help="Output file name format.", type=click.Choice(
+    ["JSONLINES", "CSV", "TXT"], case_sensitive=False), default="TXT")
+@click.option("--exclude-unmatched", "-eu", is_flag=True, help="Exclude non-matching clusters in output.")
+@click.option("--include-geo", "-ig", is_flag=True, help="Include the IP country in output.")
+@click.option("--threads", "-t", help="Number of threads. Default 1", type=int, default=1)
+@click.option("--silent", is_flag=True, help="No terminal output.")
+def wrapper(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, threads,
+            silent):
+    valid_file(patterns, "patterns", log)
+    valid_file(hosts_file, "hosts_file", log)
+
+    with ThreadPoolExecutor(threads) as executor:
+        executor.submit(main, hosts_file, patterns, match_against, size, output, format_, exclude_unmatched,
+                        include_geo, silent)
+
+
 # TODO: add an option to parse hosts from other formats, (CSV, JSON)
 if __name__ == "__main__":
-    main()
+    wrapper()
