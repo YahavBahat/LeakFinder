@@ -19,6 +19,7 @@ def valid_file(filepath, option, log):  # sourcery skip: merge-nested-ifs
 _suffixes = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
 
+# Kudos to Jules G.M. and akaIDIOT https://stackoverflow.com/a/25613067/11668025
 def human_readable_size(size):
     # determine binary order in steps of size 10
     # (coerce to int, // still returns a float)
@@ -29,7 +30,8 @@ def human_readable_size(size):
     return '{:.4g} {}'.format(size / (1 << (order * 10)), _suffixes[order])
 
 
-class Output:
+class Output(object):
+    write_instance = 0
     log = log_setup(__name__)
     console = Console()
     geo = geolite2.reader()
@@ -93,6 +95,9 @@ class Output:
                 writer.write(self.data_to_write)
         else:
             with open(f"{self.filename}.csv", mode='a') as csv_file:
-                writer = DictWriter(csv_file, fieldnames=self.data_to_write.keys())
-                writer.writeheader()
+                writer = DictWriter(csv_file, fieldnames=['Host', 'Port', 'Cluster Size', 'Module', 'Matches',
+                                                          'Matched Against', 'Country'])
+                if Output.write_instance == 0:
+                    writer.writeheader()
                 writer.writerow(self.data_to_write)
+                Output.write_instance += 1
