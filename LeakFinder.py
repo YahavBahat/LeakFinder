@@ -67,10 +67,10 @@ def info_builder(host, port, cluster_obj, filter_obj, module_name):
 @click.option("--output", "-o", is_flag=True, help="Output to file.")
 @click.option("--format", "-f", "format_", help="Output file name format.", type=click.Choice(
     ["JSONLINES", "CSV", "TXT"], case_sensitive=False), default="TXT")
-@click.option("--include-matching", "-im", is_flag=True, help="Include the matching documents/databases in output.")
+@click.option("--exclude-unmatched", "-eu", is_flag=True, help="Exclude non-matching clusters in output.")
 @click.option("--include-geo", "-ig", is_flag=True, help="Include the IP country in output.")
 @click.option("--silent", is_flag=True, help="No terminal output.")
-def main(hosts_file, patterns, match_against, size, output, format_, include_matching, include_geo, silent):
+def main(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, silent):
     cluster_instance = None
     valid_file(patterns, "patterns", log)
     valid_file(hosts_file, "hosts_file", log)
@@ -86,9 +86,9 @@ def main(hosts_file, patterns, match_against, size, output, format_, include_mat
             filter_obj = Filter(cluster_instance, patterns, match_against, size)
             Output(info_builder(host, port, cluster_instance, filter_obj, module_name), f"OUTPUT {filename}", output,
                    format_,
-                   include_matching, include_geo, silent)
-        except Exception as err:
-            log.info(f"Couldn't establish connection for {cluster_instance.host}\n")
+                   exclude_unmatched, include_geo, silent)
+        except Exception as e:
+            log.info(f"Couldn't establish connection for {host}\n")
 
 
 # TODO: add an option to parse hosts from other formats, (CSV, JSON)

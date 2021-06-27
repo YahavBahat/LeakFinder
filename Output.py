@@ -36,12 +36,12 @@ class Output(object):
     console = Console()
     geo = geolite2.reader()
 
-    def __init__(self, info, filename, output, format_, include_matching, include_geo, silent):
+    def __init__(self, info, filename, output, format_, exclude_unmatched, include_geo, silent):
         self.info = info
         self.filename = filename
         self.output = output
         self.format_ = format_
-        self.include_matching = include_matching
+        self.exclude_unmatched = exclude_unmatched
         self.include_geo = include_geo
         self.silent = silent
 

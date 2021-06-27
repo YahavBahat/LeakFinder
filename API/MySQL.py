@@ -27,7 +27,8 @@ class MySQL:
         except MySQLError as e:
             if e.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 # TODO: Try default password based on passed option
-                MySQL.log.info(f"Couldn't establish connection for {self.host}\n")
+                pass
+            MySQL.log.info(f"Couldn't establish connection for {self.host}\n")
 
     def list_database_names(self):
         self.cursor.execute("SHOW DATABASES;")
