@@ -4,7 +4,7 @@
 ## TODO:
 
 - [ ] Add a Module for Apache Cassandra.
-- [x] Implement a threading option.
+- [x] Multiprocessing.
 - [ ] Add an option to exclude unmatched clusters.
 - [ ] Disable APIs logging.
 - [ ] If authentication fails:
