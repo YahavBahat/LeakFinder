@@ -4,7 +4,8 @@ from Output import Output, valid_file
 from Filter import Filter
 from datetime import datetime
 from Logging import log_setup
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
+import time
 
 log = log_setup(__name__)
 cluster_ip = {"3306": "MySQL", "27017": "MongoDB", "9200": "ElasticSearch"}
@@ -53,21 +54,17 @@ def info_builder(host, port, cluster_obj, filter_obj, module_name):
     return info
 
 
-def main(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, silent):
-    for line in read_gen(hosts_file):
-        line = line.strip().split(":")
-        host, port = line[0], int(line[1])
-
-        cluster_obj, module_name = get_cluster_object(str(port))
-        try:
-            cluster_instance = cluster_obj(host, port)
-            cluster_method_manager(cluster_instance, patterns, match_against)
-            filter_obj = Filter(cluster_instance, patterns, match_against, size)
-            Output(info_builder(host, port, cluster_instance, filter_obj, module_name), f"OUTPUT {filename}", output,
-                   format_,
-                   exclude_unmatched, include_geo, silent)
-        except Exception:
-            log.info(f"Couldn't establish connection for {host}\n")
+def main(host, port, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, silent):
+    cluster_obj, module_name = get_cluster_object(str(port))
+    try:
+        cluster_instance = cluster_obj(host, port)
+        cluster_method_manager(cluster_instance, patterns, match_against)
+        filter_obj = Filter(cluster_instance, patterns, match_against, size)
+        Output(info_builder(host, port, cluster_instance, filter_obj, module_name), f"OUTPUT {filename}", output,
+               format_,
+               exclude_unmatched, include_geo, silent)
+    except Exception:
+        log.info(f"Couldn't establish connection for {host}\n")
 
 
 @click.command()
@@ -86,15 +83,18 @@ def main(hosts_file, patterns, match_against, size, output, format_, exclude_unm
     ["JSONLINES", "CSV", "TXT"], case_sensitive=False), default="TXT")
 @click.option("--exclude-unmatched", "-eu", is_flag=True, help="Exclude non-matching clusters in output.")
 @click.option("--include-geo", "-ig", is_flag=True, help="Include the IP country in output.")
-@click.option("--threads", "-t", help="Number of threads. Default 1", type=int, default=1)
+@click.option("--processes", help="Number of processes. Default 1", type=int, default=1)
 @click.option("--silent", is_flag=True, help="No terminal output.")
-def wrapper(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, threads,
+def wrapper(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, processes,
             silent):
     valid_file(patterns, "patterns", log)
     valid_file(hosts_file, "hosts_file", log)
 
-    with ThreadPoolExecutor(threads) as executor:
-        executor.submit(main, hosts_file, patterns, match_against, size, output, format_, exclude_unmatched,
+    executor = ProcessPoolExecutor(processes)
+    for line in read_gen(hosts_file):
+        line = line.strip().split(":")
+        host, port = line[0], int(line[1])
+        executor.submit(main, host, port, patterns, match_against, size, output, format_, exclude_unmatched,
                         include_geo, silent)
 
 
