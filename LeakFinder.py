@@ -71,7 +71,6 @@ def info_builder(host, port, cluster_obj, filter_obj, module_name):
 @click.option("--include-geo", "-ig", is_flag=True, help="Include the IP country in output.")
 @click.option("--silent", is_flag=True, help="No terminal output.")
 def main(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, silent):
-    cluster_instance = None
     valid_file(patterns, "patterns", log)
     valid_file(hosts_file, "hosts_file", log)
 
@@ -87,7 +86,7 @@ def main(hosts_file, patterns, match_against, size, output, format_, exclude_unm
             Output(info_builder(host, port, cluster_instance, filter_obj, module_name), f"OUTPUT {filename}", output,
                    format_,
                    exclude_unmatched, include_geo, silent)
-        except Exception as e:
+        except Exception:
             log.info(f"Couldn't establish connection for {host}\n")
 
 
