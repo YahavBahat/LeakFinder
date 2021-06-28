@@ -12,9 +12,10 @@ class ElasticSearch:
     logger_elasticsearch.setLevel(logging.CRITICAL)
     logger_elasticsearch.disabled = True
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, try_default):
         self.host = host
         self.port = port
+        self.try_default = try_default
 
         self.error = None
         self.es = None

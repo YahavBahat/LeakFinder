@@ -13,9 +13,10 @@ class MongoDB:
     logger.setLevel(logging.CRITICAL)
     logger.disabled = True
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, try_default):
         self.host = host
         self.port = port
+        self.try_default = try_default
 
         self.error = None
         self.client = None

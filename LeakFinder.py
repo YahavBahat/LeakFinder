@@ -52,9 +52,9 @@ def info_builder(host, port, cluster_obj, filter_obj, module_name):
     return info
 
 
-def main(host, port, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, silent):
+def main(host, port, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, try_default, silent):
     cluster_obj, module_name = get_cluster_object(str(port))
-    cluster_instance = cluster_obj(host, port)
+    cluster_instance = cluster_obj(host, port, try_default)
     if not cluster_instance.error:
         cluster_method_manager(cluster_instance, patterns, match_against)
         filter_obj = Filter(cluster_instance, patterns, match_against, size)
@@ -83,9 +83,11 @@ def main(host, port, patterns, match_against, size, output, format_, exclude_unm
 @click.option("--exclude-unmatched", "-eu", is_flag=True, help="Exclude non-matching clusters in output.")
 @click.option("--include-geo", "-ig", is_flag=True, help="Include the IP country in output.")
 @click.option("--processes", help="Number of processes. Default 1", type=int, default=1)
+@click.option("--try-default", "-t", is_flag=True, help="If authentication to the cluster fail, try to login with "
+                                                        "default credentials.")
 @click.option("--silent", is_flag=True, help="No terminal output.")
 def wrapper(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, processes,
-            silent):
+            try_default, silent):
     valid_file(patterns, "patterns", log)
     valid_file(hosts_file, "hosts_file", log)
 
@@ -94,7 +96,7 @@ def wrapper(hosts_file, patterns, match_against, size, output, format_, exclude_
         line = line.strip().split(":")
         host, port = line[0], int(line[1])
         executor.submit(main, host, port, patterns, match_against, size, output, format_, exclude_unmatched,
-                        include_geo, silent)
+                        include_geo, try_default, silent)
 
 
 # TODO: add an option to parse hosts from other formats, (CSV, JSON)
