@@ -21,6 +21,8 @@ _suffixes = ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
 # Kudos to Jules G.M. and akaIDIOT https://stackoverflow.com/a/25613067/11668025
 def human_readable_size(size):
+    if size < 0:
+        return size
     # determine binary order in steps of size 10
     # (coerce to int, // still returns a float)
     order = int(log2(size) / 10) if size else 0
