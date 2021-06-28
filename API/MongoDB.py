@@ -6,7 +6,7 @@ from Logging import log_setup
 # TODO: add option to try to connect with default password
 # TODO: catch errors in all the class methods
 class MongoDB:
-    log = log_setup(__name__)
+    log = log_setup("MongoDB")
 
     def __init__(self, host, port):
         self.host = host
