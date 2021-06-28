@@ -13,9 +13,10 @@ class Cassandra:
     logger.setLevel(logging.CRITICAL)
     logger.disabled = True
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, try_default):
         self.host = host
         self.port = port
+        self.try_default = try_default
 
         self.authentication_failed = None
         self.error = None
@@ -61,12 +62,13 @@ class Cassandra:
         except AuthenticationFailed:
             self.authentication_failed = True
 
-            for tries_count, login_tuple in enumerate(self.default_login):
-                user, password = login_tuple
-                self.retry(user, password)
-                if not self.authentication_failed:
-                    self.login_credentials["user"] = user
-                    self.login_credentials["password"] = password
+            if self.try_default:
+                for tries_count, login_tuple in enumerate(self.default_login):
+                    user, password = login_tuple
+                    self.retry(user, password)
+                    if not self.authentication_failed:
+                        self.login_credentials["user"] = user
+                        self.login_credentials["password"] = password
 
         except Exception:
             self.error = True
