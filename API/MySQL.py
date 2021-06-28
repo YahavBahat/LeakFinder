@@ -1,34 +1,47 @@
 from mysql.connector import (connection)
 from mysql.connector import Error as MySQLError
 from mysql.connector import errorcode
-from Logging import log_setup
+import logging
+from Logging import log_setup, no_connection
 
 
 # TODO: remove parameters user and password and add option to try to connect with default password
 class MySQL:
     log = log_setup("MySQL")
 
+    logger = logging.getLogger('mysql')
+    logger.setLevel(logging.CRITICAL)
+    logger.disabled = True
+
     def __init__(self, host, port):
         self.host = host
         self.port = port
 
+        self.error = None
         self.cnx = None
         self.cursor = None
         self.database_names_gen = None
         self.collections_names_gen_list = []
         self.cluster_size = 0
+        self.credentials = {}
+        self.default_logins = {"root": "", "root": "root"}
 
         self.connect()
 
-    def connect(self):
+    def connect(self, user="", password=""):
         try:
-            self.cnx = connection.MySQLConnection(host=self.host, port=self.port, user="root", password="root")
+            self.cnx = connection.MySQLConnection(host=self.host, port=self.port, user=user, password=password)
             self.cursor = self.cnx.cursor(buffered=True)
+            self.credentials[user] = password
         except MySQLError as e:
-            if e.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                # TODO: Try default password based on passed option
-                pass
-            MySQL.log.info(f"Couldn't establish connection for {self.host}\n")
+            if e.errno == errorcode.ER_ACCESS_DENIED_ERROR and user != list(self.default_logins.keys())[-1] \
+                    and password != list(self.default_logins.values())[-1]:
+                # Try default password based on passed option
+                for _user, _password in self.default_logins.items():
+                    self.connect(user=_user, password=_password)
+            else:
+                MySQL.log.info(no_connection(self.host))
+                self.error = True
 
     def list_database_names(self):
         self.cursor.execute("SHOW DATABASES;")
