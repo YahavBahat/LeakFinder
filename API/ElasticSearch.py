@@ -8,9 +8,8 @@ class ElasticSearch:
     log = log_setup(__name__)
 
     # Disable elasticsearch logging
-    tracer = logging.getLogger('elasticsearch')
-    tracer.setLevel(logging.CRITICAL)  # or desired level
-    tracer.addHandler(logging.FileHandler('indexer.log'))
+    logger = logging.getLogger('elasticsearch')
+    logger.disabled = True
 
     def __init__(self, host, port):
         self.host = host
