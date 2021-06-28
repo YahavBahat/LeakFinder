@@ -8,7 +8,7 @@
 - [x] Add an option to exclude unmatched clusters.
 - [ ] Disable `elasticsearch-py` API logging.
 - [ ] (MYSQL/CASSANDRA) If authentication fails:
-   - [ ] Authenticate with a default password.
+   - [x] Authenticate with a default password.
    - [ ] Add an option to brute force from a wordlist.
 - [ ] Refactor, comment, and clean code.
 - [ ] Add arguments to the Module instance using dictionary/config file.
