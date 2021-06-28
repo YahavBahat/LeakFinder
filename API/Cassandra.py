@@ -1,21 +1,23 @@
 from cassandra.cluster import Cluster, ExecutionProfile
 from cassandra.policies import WhiteListRoundRobinPolicy, ExponentialReconnectionPolicy
-from cassandra import ConsistencyLevel
+from cassandra import AuthenticationFailed, ConsistencyLevel
+from cassandra.auth import PlainTextAuthProvider
 import logging
-from Logging import log_setup
+from Logging import log_setup, no_connection
 
 
 class Cassandra:
     log = log_setup("Cassandra")
 
     logger = logging.getLogger('cassandra')
-    logger.setLevel(logging.ERROR)
+    logger.setLevel(logging.CRITICAL)
     logger.disabled = True
 
     def __init__(self, host, port):
         self.host = host
         self.port = port
 
+        self.error = None
         self.profile = ExecutionProfile(
             load_balancing_policy=WhiteListRoundRobinPolicy(['127.0.0.1']),
             retry_policy=ExponentialReconnectionPolicy(4, 50),
@@ -28,16 +30,23 @@ class Cassandra:
         self.database_names_gen = None
         self.collections_names_gen_list = []
         self.cluster_size = -1
+        self.default_login = "cassandra"
 
         self.connect()
 
-    def connect(self):
+    def connect(self, user="", password=""):
         try:
             self.cluster = Cluster([self.host], port=self.port,
-                                   execution_profiles={"EXEC_PROFILE_DEFAULT": self.profile})
+                                   execution_profiles={"EXEC_PROFILE_DEFAULT": self.profile},
+                                   auth_provider=PlainTextAuthProvider(username=user, password=password))
             self.session = self.cluster.connect()
-        except Exception:
-            Cassandra.log.info(f"Couldn't establish connection for {self.host}\n")
+        except AuthenticationFailed:
+            if user != self.default_login and password == self.default_login:
+                # Try default password based on passed option
+                self.connect(self.default_login, self.default_login)
+            else:
+                Cassandra.log.info(no_connection(self.host))
+                self.error = True
 
     def list_database_names(self):
         self.database_names_gen = (keyspace.keyspace_name for keyspace in self.session.execute(
