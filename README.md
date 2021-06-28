@@ -77,6 +77,12 @@ There are three possible output format one could choose using the `--format` or 
 
 The `--include-geo` or `-g` option makes it possible to include the country ISO code of the host.
 
+### Authentication
+
+If the authentication to the cluster fails, it's worth checking to see if the default password hasn't been changed.
+The `--try-default` or `-t` flag tells the program to try authenticating with the default login credentials on authentication error or denied access exceptions.
+Note: option available only in MySQL/Cassandra modules.
+
 ### Processes
 
 It is possible to use multiprocessing and greatly speed-up the time execution of the program. To set the number of processes use the `--processes` option. Defaults to `1`.
