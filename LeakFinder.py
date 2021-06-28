@@ -47,6 +47,8 @@ def info_builder(host, port, cluster_obj, filter_obj, module_name):
         info["matches"] = filter_obj.matches
     info["matched_against"] = return_matched_against({"regex_match": filter_obj.pattern_match,
                                                       "size_match": filter_obj.size_match})
+    if module_name in ("Cassandra", "MySQL") and cluster_obj.login_credentials:
+        info["login_credentials"] = str(cluster_obj.login_credentials).replace("{", "").replace("}", "")
     return info
 
 
