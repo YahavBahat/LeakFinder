@@ -3,7 +3,7 @@ from cassandra.policies import WhiteListRoundRobinPolicy, ExponentialReconnectio
 from cassandra import AuthenticationFailed, ConsistencyLevel
 from cassandra.auth import PlainTextAuthProvider
 import logging
-from Logging import log_setup, no_connection
+from Logging import log_setup
 
 
 class Cassandra:
@@ -17,6 +17,7 @@ class Cassandra:
         self.host = host
         self.port = port
 
+        self.authentication_failed = None
         self.error = None
         self.profile = ExecutionProfile(
             load_balancing_policy=WhiteListRoundRobinPolicy(['127.0.0.1']),
@@ -30,23 +31,45 @@ class Cassandra:
         self.database_names_gen = None
         self.collections_names_gen_list = []
         self.cluster_size = -1
-        self.default_login = "cassandra"
+        self.login_credentials = {}
+        self.default_login = (("cassandra", "cassandra"))
 
         self.connect()
 
-    def connect(self, user="", password=""):
+    def retry(self, user, password):
         try:
             self.cluster = Cluster([self.host], port=self.port,
                                    execution_profiles={"EXEC_PROFILE_DEFAULT": self.profile},
                                    auth_provider=PlainTextAuthProvider(username=user, password=password))
             self.session = self.cluster.connect()
+            self.authentication_failed = False
+
         except AuthenticationFailed:
-            if user != self.default_login and password == self.default_login:
-                # Try default password based on passed option
-                self.connect(self.default_login, self.default_login)
-            else:
-                Cassandra.log.info(no_connection(self.host))
-                self.error = True
+            self.authentication_failed = True
+
+        except Exception:
+            self.error = True
+
+    def connect(self):
+        try:
+            self.cluster = Cluster([self.host], port=self.port,
+                                   execution_profiles={"EXEC_PROFILE_DEFAULT": self.profile},
+                                   auth_provider=PlainTextAuthProvider(username="", password=""))
+            self.session = self.cluster.connect()
+            self.authentication_failed = False
+
+        except AuthenticationFailed:
+            self.authentication_failed = True
+
+            for tries_count, login_tuple in enumerate(self.default_login):
+                user, password = login_tuple
+                self.retry(user, password)
+                if not self.authentication_failed:
+                    self.login_credentials["user"] = user
+                    self.login_credentials["password"] = password
+
+        except Exception:
+            self.error = True
 
     def list_database_names(self):
         self.database_names_gen = (keyspace.keyspace_name for keyspace in self.session.execute(
