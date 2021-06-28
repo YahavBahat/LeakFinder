@@ -5,20 +5,21 @@ from Logging import log_setup
 
 # TODO: catch errors in all the class methods
 class ElasticSearch:
-    log = log_setup(__name__)
+    log = log_setup("ElasticSearch")
 
-    # Disable elasticsearch logging
-    logger = logging.getLogger('elasticsearch')
-    logger.disabled = True
+    # Disable elasticsearch logging - not working
+    logger_elasticsearch = logging.getLogger('elasticsearch')
+    logger_elasticsearch.setLevel(logging.ERROR)
+    logger_elasticsearch.disabled = True
 
     def __init__(self, host, port):
         self.host = host
         self.port = port
 
         self.es = None
-        self.cluster_size = 0
         self.database_names_gen = None
         self.collections_names_gen_list = iter(())
+        self.cluster_size = 0
 
         self.connect()
 
