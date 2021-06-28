@@ -6,8 +6,8 @@ from datetime import datetime
 from Logging import log_setup
 from concurrent.futures import ProcessPoolExecutor
 
-log = log_setup(__name__)
-cluster_ip = {"3306": "MySQL", "27017": "MongoDB", "9200": "ElasticSearch"}
+log = log_setup("LeakFinder")
+cluster_ip = {"3306": "MySQL", "27017": "MongoDB", "9200": "ElasticSearch", "9042": "Cassandra"}
 filename = datetime.now().strftime("%m.%d.%Y %H:%M:%S")
 
 
