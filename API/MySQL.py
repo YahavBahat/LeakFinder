@@ -6,7 +6,7 @@ from Logging import log_setup
 
 # TODO: remove parameters user and password and add option to try to connect with default password
 class MySQL:
-    log = log_setup(__name__)
+    log = log_setup("MySQL")
 
     def __init__(self, host, port):
         self.host = host
