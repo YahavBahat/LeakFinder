@@ -5,7 +5,7 @@
 
 - [x] Add a Module for Apache Cassandra.
 - [x] Multiprocessing.
-- [ ] Add an option to exclude unmatched clusters.
+- [x] Add an option to exclude unmatched clusters.
 - [ ] Disable `elasticsearch-py` API logging.
 - [ ] If authentication fails:
    - [ ] Authenticate with a default password.
