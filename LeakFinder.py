@@ -52,9 +52,8 @@ def info_builder(host, port, cluster_obj, filter_obj, module_name):
 
 def main(host, port, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, silent):
     cluster_obj, module_name = get_cluster_object(str(port))
-
-    cluster_instance = cluster_obj(host, port)
-    if not cluster_instance.error:
+    try:
+        cluster_instance = cluster_obj(host, port)
         cluster_method_manager(cluster_instance, patterns, match_against)
         filter_obj = Filter(cluster_instance, patterns, match_against, size)
         if not exclude_unmatched or any(
@@ -63,6 +62,8 @@ def main(host, port, patterns, match_against, size, output, format_, exclude_unm
             Output(info_builder(host, port, cluster_instance, filter_obj, module_name), f"OUTPUT {filename}", output,
                    format_,
                    exclude_unmatched, include_geo, silent)
+    except Exception as e:
+        log.info(f"Couldn't establish connection for [underline]{host}[/underline]\nError: {e}\n")
 
 
 @click.command()
