@@ -5,7 +5,6 @@ from Filter import Filter
 from datetime import datetime
 from Logging import log_setup
 from concurrent.futures import ProcessPoolExecutor
-import time
 
 log = log_setup(__name__)
 cluster_ip = {"3306": "MySQL", "27017": "MongoDB", "9200": "ElasticSearch"}
@@ -13,12 +12,9 @@ filename = datetime.now().strftime("%m.%d.%Y %H:%M:%S")
 
 
 def get_cluster_object(port):
-    module_name = ""
-    try:
-        module_name = cluster_ip[port]
-    except Exception:
+    module_name = cluster_ip.get(port)
+    if not module_name:
         log.error(f"Port {port} is not linked with any module. Available modules by host ports \n{cluster_ip}")
-        exit()
     module = import_module(f"API.{module_name}")
     return getattr(module, module_name), module_name
 
@@ -63,8 +59,8 @@ def main(host, port, patterns, match_against, size, output, format_, exclude_unm
         Output(info_builder(host, port, cluster_instance, filter_obj, module_name), f"OUTPUT {filename}", output,
                format_,
                exclude_unmatched, include_geo, silent)
-    except Exception:
-        log.info(f"Couldn't establish connection for {host}\n")
+    except Exception as e:
+        log.info(f"Couldn't establish connection for {host}\nError: {e}\n")
 
 
 @click.command()
