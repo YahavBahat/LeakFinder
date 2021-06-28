@@ -3,7 +3,7 @@
 
 ## TODO:
 
-- [ ] Add a Module for Apache Cassandra.
+- [x] Add a Module for Apache Cassandra.
 - [x] Multiprocessing.
 - [ ] Add an option to exclude unmatched clusters.
 - [ ] Disable APIs logging.
