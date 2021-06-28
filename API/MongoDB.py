@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 from pymongo.database import Database
-from Logging import log_setup
+import logging
+from Logging import log_setup, no_connection
 
 
 # TODO: add option to try to connect with default password
@@ -8,10 +9,15 @@ from Logging import log_setup
 class MongoDB:
     log = log_setup("MongoDB")
 
+    logger = logging.getLogger('pymongo')
+    logger.setLevel(logging.CRITICAL)
+    logger.disabled = True
+
     def __init__(self, host, port):
         self.host = host
         self.port = port
 
+        self.error = None
         self.client = None
         self.database_names_gen = None
         self.collections_names_gen_list = []
@@ -23,7 +29,8 @@ class MongoDB:
         try:
             self.client = MongoClient(self.host, self.port)
         except Exception:
-            MongoDB.log.info(f"Couldn't establish connection for {self.host}\n")
+            MongoDB.log.info(no_connection(self.host))
+            self.error = True
 
     def list_database_names(self):
         self.database_names_gen = (database["name"] for database in self.client.list_databases())
