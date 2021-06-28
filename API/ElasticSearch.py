@@ -1,6 +1,6 @@
 from elasticsearch import Elasticsearch
 import logging
-from Logging import log_setup
+from Logging import log_setup, no_connection
 
 
 # TODO: catch errors in all the class methods
@@ -9,13 +9,14 @@ class ElasticSearch:
 
     # Disable elasticsearch logging - not working
     logger_elasticsearch = logging.getLogger('elasticsearch')
-    logger_elasticsearch.setLevel(logging.ERROR)
+    logger_elasticsearch.setLevel(logging.CRITICAL)
     logger_elasticsearch.disabled = True
 
     def __init__(self, host, port):
         self.host = host
         self.port = port
 
+        self.error = None
         self.es = None
         self.database_names_gen = None
         self.collections_names_gen_list = iter(())
@@ -26,7 +27,8 @@ class ElasticSearch:
     def connect(self):
         self.es = Elasticsearch(f"{self.host}:{self.port}")
         if not self.es.ping():
-            ElasticSearch.log.info(f"Couldn't establish connection for {self.host}\n")
+            ElasticSearch.log.info(no_connection(self.host))
+            self.error = True
 
     def list_database_names(self):
         self.database_names_gen = iter(self.es.indices.get_alias().keys())
