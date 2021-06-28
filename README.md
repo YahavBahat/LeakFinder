@@ -57,6 +57,7 @@ If I would want to get the clusters which size is smaller than 7MB, I would pass
 ```
 '{"smaller": 7000000}'
 ```
+Note: Cassandra cluster's size won't be calculated and will be showen as `-1`.
 
 #### Filtering Clusters by Regex Patterns
 
