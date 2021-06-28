@@ -28,7 +28,7 @@ def cluster_method_manager(cluster_instance, patterns, match_against):
         else:
             cluster_instance.list_database_names()
             cluster_instance.list_collections_names()
-        cluster_instance.get_total_size()
+    cluster_instance.get_total_size()
 
 
 def read_gen(filepath):
