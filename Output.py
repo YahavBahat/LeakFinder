@@ -69,8 +69,8 @@ class Output(object):
         data = {"Host": self.info.get("host"), "Port": self.info.get("port"),
                 "Cluster Size": human_readable_size(self.info.get("cluster_size")), "Module": self.info.get("module")}
 
-        if self.info.get("matches"):
-            matches = self.info.get("matches")[:30]
+        if self.info.get("matches") and self.exclude_unmatched:
+            matches = self.info.get("matches")[:50]
             if len(matches) > 50:
                 matches = matches[:50]
                 data["Matches"] = f"{', '.join(matches)}..."
