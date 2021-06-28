@@ -15,10 +15,9 @@
 - [About](#about)
 - [Getting Started](#getting_started)
 - [Usage](#usage)
-- [TODO](../TODO.md)
-- [Contributing](../CONTRIBUTING.md)
+- [TODO](#TODO.)
+- [Contributing](Contributing)
 - [Authors](#authors)
-- [Acknowledgments](#acknowledgement)
 
 ## 🧐 About <a name = "about"></a>
 Find interesting and exposed databases from a list of hosts. The program has the ability to filter and find interesting clusters by the its size, regex patterns, and keywords of your choosing. The program can also output the results into three different formats, including CSV, TXT, and JSONLINES.
@@ -89,7 +88,7 @@ It is possible to use multiprocessing and greatly speed-up the time execution of
 
 You can pass the `--silent` flag to turn off terminal output.
 
-## Example
+### Example
 
 To filter clusters by regex patterns and filter those whose size is bigger than 10MB, to include the host's country ISO code in output and to output to a JSONLINES (`.jsonl`) file, while using 12 processes, one would use this command:
 ```
