@@ -1,7 +1,7 @@
 from mysql.connector import (connection)
 from mysql.connector import Error as MySQLError
 from mysql.connector import errorcode
-from Logging import log_setup
+from Logging import log_setup, successfully_authenticated
 
 
 # TODO: remove parameters user and password and add option to try to connect with default password
@@ -12,22 +12,49 @@ class MySQL:
         self.host = host
         self.port = port
 
+        self.authentication_failed = None
+        self.error = None
         self.cnx = None
         self.cursor = None
         self.database_names_gen = None
         self.collections_names_gen_list = []
         self.cluster_size = 0
+        self.login_credentials = {}
+        self.default_login = (("root", ""), ("root", "root"))
 
         self.connect()
 
-    def connect(self):
+    def retry(self, user, password):
         try:
-            self.cnx = connection.MySQLConnection(host=self.host, port=self.port, user="root", password="root")
+            self.cnx = connection.MySQLConnection(host=self.host, port=self.port, user=user, password=password)
             self.cursor = self.cnx.cursor(buffered=True)
+            self.authentication_failed = False
+
         except MySQLError as e:
             if e.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                # TODO: Try default password based on passed option
-                pass
+                self.authentication_failed = True
+
+            else:
+                self.error = True
+
+    def connect(self):
+        try:
+            self.cnx = connection.MySQLConnection(host=self.host, port=self.port, user="", password="")
+            self.cursor = self.cnx.cursor(buffered=True)
+            self.authentication_failed = False
+        except MySQLError as e:
+            if e.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                self.authentication_failed = True
+
+                for tries_count, login_tuple in enumerate(self.default_login):
+                    user, password = login_tuple
+                    self.retry(user, password)
+                    if not self.authentication_failed:
+                        self.login_credentials["user"] = user
+                        self.login_credentials["password"] = password
+
+            else:
+                self.error = True
             MySQL.log.info(f"Couldn't establish connection for {self.host}\n")
 
     def list_database_names(self):
