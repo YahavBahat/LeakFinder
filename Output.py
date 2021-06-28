@@ -81,6 +81,9 @@ class Output(object):
         if self.include_geo:
             self.country_iso_code = Output.geo.get(self.info.get("host")).get("country").get("iso_code")
             data["Country"] = f"{self.country_iso_code} {flagize(f':{self.country_iso_code}:')}"
+
+        if self.info.get("login_credentials"):
+            data["Login Credentials"] = self.info.get("login_credentials")
         return data
 
     def write(self):
