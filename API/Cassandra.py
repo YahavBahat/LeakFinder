@@ -1,5 +1,6 @@
 from cassandra.cluster import Cluster, ExecutionProfile
-from cassandra.policies import WhiteListRoundRobinPolicy
+from cassandra.policies import WhiteListRoundRobinPolicy, ExponentialReconnectionPolicy
+from cassandra import ConsistencyLevel
 import logging
 from Logging import log_setup
 
@@ -16,7 +17,11 @@ class Cassandra:
         self.port = port
 
         self.profile = ExecutionProfile(
-            load_balancing_policy=WhiteListRoundRobinPolicy(['127.0.0.1'])
+            load_balancing_policy=WhiteListRoundRobinPolicy(['127.0.0.1']),
+            retry_policy=ExponentialReconnectionPolicy(4, 50),
+            consistency_level=ConsistencyLevel.LOCAL_ONE,
+            request_timeout=40,
+            serial_consistency_level=ConsistencyLevel.LOCAL_SERIAL
         )
         self.cluster = None
         self.session = None
@@ -28,8 +33,8 @@ class Cassandra:
 
     def connect(self):
         try:
-            self.cluster = Cluster([self.host], port=self.port, execution_profiles=
-            {"EXEC_PROFILE_DEFAULT": self.profile})
+            self.cluster = Cluster([self.host], port=self.port,
+                                   execution_profiles={"EXEC_PROFILE_DEFAULT": self.profile})
             self.session = self.cluster.connect()
         except Exception:
             Cassandra.log.info(f"Couldn't establish connection for {self.host}\n")
