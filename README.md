@@ -7,7 +7,7 @@
 - [x] Multiprocessing.
 - [x] Add an option to exclude unmatched clusters.
 - [ ] Disable `elasticsearch-py` API logging.
-- [ ] If authentication fails:
+- [ ] (MYSQL/CASSANDRA) If authentication fails:
    - [ ] Authenticate with a default password.
    - [ ] Add an option to brute force from a wordlist.
 - [ ] Refactor, comment, and clean code.
