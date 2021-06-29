@@ -7,7 +7,7 @@ from Logging import log_setup, no_connection
 class ElasticSearch:
     log = log_setup("ElasticSearch")
 
-    # Disable elasticsearch logging - not working
+    # Disable elasticsearch logging
     logger_elasticsearch = logging.getLogger('elasticsearch')
     logger_elasticsearch.setLevel(logging.CRITICAL)
     logger_elasticsearch.disabled = True
