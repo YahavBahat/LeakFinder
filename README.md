@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="" rel="noopener">
+  <a href="https://github.com/YahavBahat/LeakFinder" rel="noopener">
  <img width=400px height=250px src="https://securityintelligence.com/wp-content/uploads/2017/09/leaking-cloud-databases-and-servers-expose-over-1-billion-records.jpg" alt="Project logo"></a>
 </p>
 
@@ -34,6 +34,7 @@ pip3 install requirements.txt
 ```
 
 ## 🎈 Usage <a name="usage"></a>
+Program supports the following Data Management System: Apache Cassandra, Elasticsearch, MongoDB, MySQL.
 Get help using
 ```
 python3 LeakFinder.py --help
@@ -70,6 +71,7 @@ The following options are available: `[Databases names|Documents names|All]`. `-
 ### Ouput
 
 In order to ouput the results to a file one would pass the `--output` or `-o` flag.
+Note that output results are not in the same order of the hosts file.
 
 #### Output Formats
 
