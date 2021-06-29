@@ -11,7 +11,6 @@ class MongoDB:
 
     logger = logging.getLogger('pymongo')
     logger.setLevel(logging.CRITICAL)
-    logger.disabled = True
 
     def __init__(self, host, port, try_default):
         self.host = host
