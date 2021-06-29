@@ -122,12 +122,13 @@ python LeakFinder.py -h hosts.txt --patterns my_patterns.txt --size '{"smaller":
 - [x] Add an option to exclude unmatched clusters.
 - [x] Get vulnerabilities using Shodan API.
 - [x] Disable module API logging.
-- [ ] (MYSQL/CASSANDRA) If authentication fails:
-   - [x] Authenticate with a default password.
+- [ ] Continuously get a stream of hosts from Shodan Stream API.
+- [ ] If authentication fails:
+   - [x] (MYSQL/CASSANDRA) Authenticate with a default password.
    - [ ] Add an option to brute force from a wordlist.
 - [ ] Refactor, document, and clean code.
 - [ ] Add an option to add a custom module.
-- [x] Add an optional to match hosts whose port is different then the service's default port (e.g., host with port 9201, compared to the default port of ES, which is 9200)
+- [x] Add an option to match hosts whose port is different then the service's default port (e.g., host with port 9201, compared to the default port of ES, which is 9200) using NMAP.
 
 ## Contributing <a name="Contributing"></a>
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
