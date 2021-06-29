@@ -70,6 +70,7 @@ The following options are available: `[Databases names|Documents names|All]`. `-
 ### Ouput
 
 In order to ouput the results to a file one would pass the `--output` or `-o` flag.
+Note that output results are not in the same order of the hosts file.
 
 #### Output Formats
 
