@@ -78,9 +78,9 @@ def main(host, port, patterns, match_against, size, output, format_, exclude_unm
 @click.option("--match-against", "-m", help="Where to match regex patterns.", type=click.Choice(
     ["Databases names", "Documents names", "All"], case_sensitive=False), default="All")
 @click.option("--size", "-s", help="Filter clusters by size (in bytes)."
-                                   " For example, to filter clusters bigger than 10MB you would pass: {'bigger': "
-                                   "10000000}. To filter clusters bigger than 10MB but smaller than 100MB you would "
-                                   "pass: {'bigger': 10000000, 'smaller': 100000000}.", type=str)
+                                   " For example, to filter clusters bigger than 10MB you would pass: '{\"bigger\": "
+                                   "10000000}'. To filter clusters bigger than 10MB but smaller than 100MB you would "
+                                   "pass: '{\"bigger\": 10000000, \"smaller\": 100000000}'.", type=str)
 @click.option("--output", "-o", is_flag=True, help="Output to file.")
 @click.option("--format", "-f", "format_", help="Output file name format.", type=click.Choice(
     ["JSONLINES", "CSV", "TXT"], case_sensitive=False), default="TXT")
