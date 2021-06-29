@@ -15,7 +15,7 @@
 - [About](#about)
 - [Getting Started](#getting_started)
 - [Usage](#usage)
-- [TODO](#TODO.)
+- [TODO](#TODO)
 - [Contributing](Contributing)
 - [Authors](#authors)
 
@@ -107,7 +107,7 @@ To filter clusters by regex patterns and filter those whose size is bigger than 
 python LeakFinder.py -h hosts.txt --patterns my_patterns.txt --size '{"smaller": 7000000}' -ig -o -f JSONLINES --processes 12 -ig
 ```
 
-## 🚧 TODO:
+## 🚧 TODO: <a name="TODO"></a>
 - [x] Add a Module for Apache Cassandra.
 - [x] Multiprocessing.
 - [x] Add an option to exclude unmatched clusters.
@@ -120,8 +120,8 @@ python LeakFinder.py -h hosts.txt --patterns my_patterns.txt --size '{"smaller":
 - [ ] Add an option to add a custom module.
 - [ ] Add an optional format to hosts.txt file `IP:PORT:MODULE_NAME` to be used to filter hosts to their suitable modules correctly, including hosts with non-default, unset ports.
 
-## Contributing
+## Contributing <a name="Contributing"></a>
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-## ✍️ Authors <a name = "authors"></a>
+## ✍️ Authors <a name="authors"></a>
 - [@YahavBahat](https://github.com/YahavBahat)
