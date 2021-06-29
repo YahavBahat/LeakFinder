@@ -89,6 +89,10 @@ It is possible to use multiprocessing and greatly speed-up the time execution of
 
 You can pass the `--silent` flag to turn off terminal output.
 
+### Vulnerability Scanning
+
+It is possible to scan the host for vulnerabilities using the Shodan API key. The query does **not** take scan or query credits.
+
 ### Example
 
 To filter clusters by regex patterns and filter those whose size is bigger than 10MB, to include the host's country ISO code in output and to output to a JSONLINES (`.jsonl`) file, while using 12 processes, one would use this command:
