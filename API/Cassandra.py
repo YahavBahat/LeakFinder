@@ -9,9 +9,7 @@ from Logging import log_setup
 class Cassandra:
     log = log_setup("Cassandra")
 
-    logger = logging.getLogger('cassandra')
-    logger.setLevel(logging.CRITICAL)
-    logger.disabled = True
+    logging.getLogger('cassandra').setLevel(logging.CRITICAL)
 
     def __init__(self, host, port, try_default):
         self.host = host
