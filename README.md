@@ -42,6 +42,13 @@ python3 LeakFinder.py --help
 
 `--hosts-file` or `-h` is required.
 
+### NMAP
+
+The program matches every host to its suitable module by comparing the default port of the service/module (e.g., 9200 for ES) to the host's port from the hosts file. Sometimes, there are hosts with a port different from the module default one. Thus, the program cannot match the host to its suitable module.
+This is where NMAP can help. We can find the service/module name using NMAP service scan, directly matching the host to the module.
+You can enable this feature using the `--version-scan` or `-v` flag.
+However, this could slow the program, so if one wants to exclude hosts with non-default ports, all he has to do is not to pass the `--version-scan` or `-v` flag.
+
 ### Filtering  Clusters
 
 To exclude clusters who don't meet the specified standards, one would use the flag `--exclude-unmatched` or `-eu`.
@@ -120,7 +127,7 @@ python LeakFinder.py -h hosts.txt --patterns my_patterns.txt --size '{"smaller":
    - [ ] Add an option to brute force from a wordlist.
 - [ ] Refactor, document, and clean code.
 - [ ] Add an option to add a custom module.
-- [ ] Add an optional format to hosts.txt file `IP:PORT:MODULE_NAME` to be used to filter hosts to their suitable modules correctly, including hosts with non-default, unset ports.
+- [x] Add an optional to match hosts whose port is different then the service's default port (e.g., host with port 9201, compared to the default port of ES, which is 9200)
 
 ## Contributing <a name="Contributing"></a>
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
