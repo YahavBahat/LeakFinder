@@ -50,14 +50,14 @@ def info_builder(host, port, cluster_obj, filter_obj, module_name, shodan):
                                                       "size_match": filter_obj.size_match})
     if module_name in ("Cassandra", "MySQL") and cluster_obj.login_credentials:
         info["login_credentials"] = str(cluster_obj.login_credentials).replace("{", "").replace("}", "")
-    if shodan:
-        s = Shodan(host, shodan)
-        if not s.error:
-            info["vulnerabilities"] = s.get_vulns()
+    s = Shodan(host, shodan)
+    if not s.error and not s.cancel:
+        info["vulnerabilities"] = s.get_vulns()
     return info
 
 
-def main(host, port, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, try_default, shodan, silent):
+def main(host, port, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, try_default,
+         shodan, silent):
     cluster_obj, module_name = get_cluster_object(str(port))
     cluster_instance = cluster_obj(host, port, try_default)
     if not cluster_instance.error:
@@ -66,9 +66,8 @@ def main(host, port, patterns, match_against, size, output, format_, exclude_unm
         if not exclude_unmatched or any(
                 (filter_obj.pattern_match, filter_obj.size_match)
         ):
-            Output(info_builder(host, port, cluster_instance, filter_obj, module_name, shodan), f"OUTPUT {filename}", output,
-                   format_,
-                   exclude_unmatched, include_geo, silent)
+            Output(info_builder(host, port, cluster_instance, filter_obj, module_name, shodan), f"OUTPUT {filename}",
+                   output, format_, exclude_unmatched, include_geo, silent)
 
 
 @click.command()

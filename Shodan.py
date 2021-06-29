@@ -16,17 +16,16 @@ class Shodan:
         self.api = api
 
         self.error = None
+        self.cancel = None
         self.get_api()
 
     def get_api(self):
         # If user didn't pass API key from the command line arguments, search in config.config file.
         if not self.api:
             with open("config.config", "r") as f:
-                data = load(f)
-            self.api = data.get("api")
+                self.api = load(f).get("api")
         if not self.api:
-            Shodan.log.error("You passed the --shodan/-sn api option, or defined it in config.config file,"
-                             " but no Shodan API provided.")
+            cancel = True
             self.error = True
 
     def get_vulns(self):
