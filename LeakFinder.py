@@ -90,7 +90,8 @@ def main(host, port, patterns, match_against, size, output, format_, exclude_unm
 @click.option("--processes", help="Number of processes. Default 1", type=int, default=1)
 @click.option("--try-default", "-t", is_flag=True, help="If authentication to the cluster fail, try to login with "
                                                         "default credentials.")
-@click.option("--shodan", "-sn", help="To get vulnerabilities of matched clusters Shodan API key is required.")
+@click.option("--shodan", "-sn", help="To get vulnerabilities of matched clusters Shodan API key is required."
+                                      " Either pass as a CLI argument or input the API key at config.config file.")
 @click.option("--silent", is_flag=True, help="No terminal output.")
 def wrapper(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, processes,
             try_default, shodan, silent):
