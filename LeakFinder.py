@@ -5,6 +5,7 @@ from Filter import Filter
 from datetime import datetime
 from Logging import log_setup
 from concurrent.futures import ProcessPoolExecutor
+from Shodan import Shodan
 
 log = log_setup("LeakFinder")
 cluster_ip = {"3306": "MySQL", "27017": "MongoDB", "9200": "ElasticSearch", "9042": "Cassandra"}
@@ -40,7 +41,7 @@ def return_matched_against(matched_against_dict):
     return [key.replace("_", " ").title() for key, value in matched_against_dict.items() if value]
 
 
-def info_builder(host, port, cluster_obj, filter_obj, module_name):
+def info_builder(host, port, cluster_obj, filter_obj, module_name, shodan):
     # Returns a dictionary for class Output
     info = {"host": host, "port": port, "cluster_size": cluster_obj.cluster_size, "module": module_name}
     if filter_obj.pattern_match:
@@ -49,10 +50,14 @@ def info_builder(host, port, cluster_obj, filter_obj, module_name):
                                                       "size_match": filter_obj.size_match})
     if module_name in ("Cassandra", "MySQL") and cluster_obj.login_credentials:
         info["login_credentials"] = str(cluster_obj.login_credentials).replace("{", "").replace("}", "")
+    if shodan:
+        s = Shodan(host, shodan)
+        if not s.error:
+            info["vulnerabilities"] = s.get_vulns()
     return info
 
 
-def main(host, port, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, try_default, silent):
+def main(host, port, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, try_default, shodan, silent):
     cluster_obj, module_name = get_cluster_object(str(port))
     cluster_instance = cluster_obj(host, port, try_default)
     if not cluster_instance.error:
@@ -61,7 +66,7 @@ def main(host, port, patterns, match_against, size, output, format_, exclude_unm
         if not exclude_unmatched or any(
                 (filter_obj.pattern_match, filter_obj.size_match)
         ):
-            Output(info_builder(host, port, cluster_instance, filter_obj, module_name), f"OUTPUT {filename}", output,
+            Output(info_builder(host, port, cluster_instance, filter_obj, module_name, shodan), f"OUTPUT {filename}", output,
                    format_,
                    exclude_unmatched, include_geo, silent)
 
@@ -85,9 +90,10 @@ def main(host, port, patterns, match_against, size, output, format_, exclude_unm
 @click.option("--processes", help="Number of processes. Default 1", type=int, default=1)
 @click.option("--try-default", "-t", is_flag=True, help="If authentication to the cluster fail, try to login with "
                                                         "default credentials.")
+@click.option("--shodan", "-sn", help="To get vulnerabilities of matched clusters Shodan API key is required.")
 @click.option("--silent", is_flag=True, help="No terminal output.")
 def wrapper(hosts_file, patterns, match_against, size, output, format_, exclude_unmatched, include_geo, processes,
-            try_default, silent):
+            try_default, shodan, silent):
     valid_file(patterns, "patterns", log)
     valid_file(hosts_file, "hosts_file", log)
 
@@ -96,7 +102,7 @@ def wrapper(hosts_file, patterns, match_against, size, output, format_, exclude_
         line = line.strip().split(":")
         host, port = line[0], int(line[1])
         executor.submit(main, host, port, patterns, match_against, size, output, format_, exclude_unmatched,
-                        include_geo, try_default, silent)
+                        include_geo, try_default, shodan, silent)
 
 
 # TODO: add an option to parse hosts from other formats, (CSV, JSON)

@@ -10,7 +10,6 @@ class ElasticSearch:
     # Disable elasticsearch logging
     logger_elasticsearch = logging.getLogger('elasticsearch')
     logger_elasticsearch.setLevel(logging.CRITICAL)
-    logger_elasticsearch.disabled = True
 
     def __init__(self, host, port, try_default):
         self.host = host

@@ -1,12 +1,16 @@
 from mysql.connector import (connection)
 from mysql.connector import Error as MySQLError
 from mysql.connector import errorcode
+import logging
 from Logging import log_setup, successfully_authenticated
 
 
 # TODO: remove parameters user and password and add option to try to connect with default password
 class MySQL:
     log = log_setup("MySQL")
+
+    logging.getLogger('mysql.connector').setLevel(logging.CRITICAL)
+    logging.getLogger('mysql').setLevel(logging.CRITICAL)
 
     def __init__(self, host, port, try_default):
         self.host = host

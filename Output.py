@@ -63,6 +63,9 @@ class Output(object):
         for key, value in self.data_to_write.items():
             key = Text(key)
             key.stylize("bold")
+            if str(key) == "Vulnerabilities":
+                value = value[:30]
+                value = ', '.join(value)
             Output.console.print(key + f": {value}\n")
 
     def get_data_to_write(self):
@@ -84,6 +87,9 @@ class Output(object):
 
         if self.info.get("login_credentials"):
             data["Login Credentials"] = self.info.get("login_credentials")
+
+        if self.info.get("vulnerabilities"):
+            data["Vulnerabilities"] = self.info.get("vulnerabilities")
         return data
 
     def write(self):
