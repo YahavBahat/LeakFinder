@@ -15,8 +15,8 @@
 - [About](#about)
 - [Getting Started](#getting_started)
 - [Usage](#usage)
-- [TODO](#TODO.)
-- [Contributing](Contributing)
+- [TODO](#TODO)
+- [Contributing](#Contributing)
 - [Authors](#authors)
 
 ## 🧐 About <a name = "about"></a>
@@ -89,6 +89,17 @@ It is possible to use multiprocessing and greatly speed-up the time execution of
 
 You can pass the `--silent` flag to turn off terminal output.
 
+### Vulnerability Scanning
+
+It is possible to scan the matched hosts/clusters for vulnerabilities using the Shodan API key. The query does **not** take scan or query credits.
+To pass the shodan API key one can either use the command-line argument `--shodan` or `-sn`, or alternatively put insert the API key in the `config.config` file, in the value of the `api` key.
+
+
+`config.config` example file:
+```
+{"api": "APIKEY"}
+```
+
 ### Example
 
 To filter clusters by regex patterns and filter those whose size is bigger than 10MB, to include the host's country ISO code in output and to output to a JSONLINES (`.jsonl`) file, while using 12 processes, one would use this command:
@@ -96,7 +107,7 @@ To filter clusters by regex patterns and filter those whose size is bigger than 
 python LeakFinder.py -h hosts.txt --patterns my_patterns.txt --size '{"smaller": 7000000}' -ig -o -f JSONLINES --processes 12 -ig
 ```
 
-## 🚧 TODO:
+## 🚧 TODO: <a name="TODO"></a>
 - [x] Add a Module for Apache Cassandra.
 - [x] Multiprocessing.
 - [x] Add an option to exclude unmatched clusters.
@@ -109,8 +120,8 @@ python LeakFinder.py -h hosts.txt --patterns my_patterns.txt --size '{"smaller":
 - [ ] Add an option to add a custom module.
 - [ ] Add an optional format to hosts.txt file `IP:PORT:MODULE_NAME` to be used to filter hosts to their suitable modules correctly, including hosts with non-default, unset ports.
 
-## Contributing
+## Contributing <a name="Contributing"></a>
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-## ✍️ Authors <a name = "authors"></a>
+## ✍️ Authors <a name="authors"></a>
 - [@YahavBahat](https://github.com/YahavBahat)
