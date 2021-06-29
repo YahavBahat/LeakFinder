@@ -100,6 +100,7 @@ python LeakFinder.py -h hosts.txt --patterns my_patterns.txt --size '{"smaller":
 - [x] Add a Module for Apache Cassandra.
 - [x] Multiprocessing.
 - [x] Add an option to exclude unmatched clusters.
+- [ ] Add nmap vulnerability scanner.
 - [ ] Disable `elasticsearch-py` and `mysql` API logging.
 - [ ] (MYSQL/CASSANDRA) If authentication fails:
    - [x] Authenticate with a default password.
