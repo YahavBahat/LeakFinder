@@ -91,7 +91,14 @@ You can pass the `--silent` flag to turn off terminal output.
 
 ### Vulnerability Scanning
 
-It is possible to scan the host for vulnerabilities using the Shodan API key. The query does **not** take scan or query credits.
+It is possible to scan the matched hosts/clusters for vulnerabilities using the Shodan API key. The query does **not** take scan or query credits.
+To pass the shodan API key one can either use the command-line argument `--shodan` or `-sn`, or alternatively put insert the API key in the `config.config` file, in the value of the `api` key.
+
+
+`config.config` example file:
+```
+{"api": "APIKEY"}
+```
 
 ### Example
 
