@@ -34,6 +34,7 @@ pip3 install requirements.txt
 ```
 
 ## 🎈 Usage <a name="usage"></a>
+Program supports the following Data Management System: Apache Cassandra, Elasticsearch, MongoDB, MySQL.
 Get help using
 ```
 python3 LeakFinder.py --help
