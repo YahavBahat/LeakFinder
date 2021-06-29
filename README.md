@@ -16,7 +16,7 @@
 - [Getting Started](#getting_started)
 - [Usage](#usage)
 - [TODO](#TODO)
-- [Contributing](Contributing)
+- [Contributing](#Contributing)
 - [Authors](#authors)
 
 ## 🧐 About <a name = "about"></a>
