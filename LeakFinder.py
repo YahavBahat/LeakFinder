@@ -177,7 +177,7 @@ class LeakFinder:
 @click.option("--processes", help="Number of processes. Default 1", type=int, default=1)
 @click.option("--try-default", "-t", is_flag=True, help="If authentication to the cluster fail, try to login with "
                                                         "default credentials.")
-@click.option("--shodan-vulns", "-sn", is_flag=True, help="To get vulnerabilities of matched clusters Shodan API key "
+@click.option("--shodan-vulns", "-sv", is_flag=True, help="To get vulnerabilities of matched clusters Shodan API key "
                                                           "is required. Insert the Shodan key in config.config file, "
                                                           "and pass this flag.")
 @click.option("--silent", is_flag=True, help="No terminal output.")
