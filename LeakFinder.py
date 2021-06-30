@@ -1,4 +1,6 @@
 import click
+from cloup import command, option, option_group
+from cloup.constraints import mutually_exclusive
 from importlib import import_module
 from Output import Output, valid_file
 from Filter import Filter
@@ -19,9 +21,10 @@ class LeakFinder:
     filename = datetime.now().strftime("%m.%d.%Y %H:%M:%S")
     nmap = nmap3.Nmap()
 
-    def __init__(self, hosts_file, version_scan, patterns, match_against, size, output, format_, exclude_unmatched,
-                 include_geo, processes, try_default, shodan, silent):
+    def __init__(self, hosts_file, shodan_stream, version_scan, patterns, match_against, size, output, format_,
+                 exclude_unmatched, include_geo, processes, try_default, shodan_vulns, silent):
         self.hosts_file = hosts_file
+        self.shodan_stream = shodan_stream
         self.version_scan = version_scan
         self.patterns = patterns
         self.match_against = match_against
@@ -32,7 +35,7 @@ class LeakFinder:
         self.include_geo = include_geo
         self.processes = processes
         self.try_default = try_default
-        self.shodan = shodan
+        self.shodan_vulns = shodan_vulns
         self.silent = silent
 
         self.host, self.port = None, None
@@ -40,11 +43,14 @@ class LeakFinder:
         self.module_name = None
 
     def yieldConnectionTuple(self):
-        with open(self.hosts_file, "r") as f:
-            for line in f:
-                line = line.strip().split(":")
-                host, port = line[0], int(line[1])
-                yield host, port
+        if self.hosts_file:
+            with open(self.hosts_file, "r") as f:
+                for line in f:
+                    line = line.strip().split(":")
+                    yield line
+        elif self.shodan_stream:
+            s = Shodan()
+            yield from s.stream()
 
     def get_service(self):
         try:
@@ -85,24 +91,38 @@ class LeakFinder:
                 self.cluster_instance.list_collections_names()
         self.cluster_instance.get_total_size()
 
-    # host, port, cluster_obj, filter_instance, module_name, shodan
+    # Returns a dictionary for class Output
     def info_builder(self):
-        # Returns a dictionary for class Output
-        info = {"host": self.host, "port": self.port, "cluster_size": self.cluster_instance.cluster_size,
-                "module": self.module_name}
+        s = Shodan(self.host)
+
+        info = {"host": self.host, "port": self.port}
+
+        hostnames = s.get_hostnames()
+
+        if hostnames:
+            info["hostnames"] = hostnames
+
+        info.update({"cluster_size": self.cluster_instance.cluster_size,
+                     "module": self.module_name})
+
         if self.filter_instance.pattern_match:
             info["matches"] = self.filter_instance.matches
         info["matched_against"] = return_matched_against({"regex_match": self.filter_instance.pattern_match,
                                                           "size_match": self.filter_instance.size_match})
+
         if self.module_name in ("Cassandra", "MySQL") and self.cluster_instance.login_credentials:
             info["login_credentials"] = str(self.cluster_instance.login_credentials).replace("{", "").replace("}", "")
-        s = Shodan(self.host)
-        if not s.error and not s.cancel:
-            info["vulnerabilities"] = s.get_vulns()
+
+        if (any((self.filter_instance.size_match, self.filter_instance.pattern_match))
+                and self.shodan_vulns and not any((s.error, s.cancel))):
+            vulns = s.get_vulns()
+            if vulns:
+                info["vulnerabilities"] = vulns
         return info
 
     def main(self, connection_tuple):
         self.host, self.port = connection_tuple
+        self.port = str(self.port)
         cluster_obj, self.module_name = self.get_cluster_object()
         self.cluster_instance = cluster_obj(self.host, self.port, self.try_default)
         if not self.cluster_instance.error:
@@ -115,18 +135,24 @@ class LeakFinder:
                        self.exclude_unmatched, self.include_geo, self.silent)
 
     def wrapper(self):
-        valid_file(self.hosts_file, "hosts_file", LeakFinder.log)
+        if self.hosts_file:
+            valid_file(self.hosts_file, "hosts_file", LeakFinder.log)
         if self.patterns:
             valid_file(self.patterns, "patterns", LeakFinder.log)
 
-        executor = ProcessPoolExecutor(self.processes)
+        with ProcessPoolExecutor(self.processes) as executor:
+            for connection_tuple in self.yieldConnectionTuple():
+                executor.submit(self.main, connection_tuple)
 
-        executor.map(self.main, [connection_tuple for connection_tuple in self.yieldConnectionTuple()])
 
-
-@click.command()
-@click.option("--hosts-file", "-h", help="Path to filename with hosts [IP:PORT] format, separated by a newline.",
-              required=True)
+@command()
+@option_group("Hosts provider",
+              option("--hosts-file", "-h",
+                     help="Path to filename with hosts [IP:PORT] format, separated by a newline."),
+              option("--shodan-stream", "-ss", is_flag=True, help="Get hosts using Shodan Stream API. Required to pass "
+                                                                  "Shodan API in config.config file."),
+              constraint=mutually_exclusive
+              )
 @click.option("--version-scan", "-v", is_flag=True, help="The program filters hosts to their suitable modules "
                                                          "(e.g., MongoDB, Cassandra, Elasticsearch) by comparing the  "
                                                          "module/service's default port to the host's port."
@@ -151,14 +177,16 @@ class LeakFinder:
 @click.option("--processes", help="Number of processes. Default 1", type=int, default=1)
 @click.option("--try-default", "-t", is_flag=True, help="If authentication to the cluster fail, try to login with "
                                                         "default credentials.")
-@click.option("--shodan", "-sn", help="To get vulnerabilities of matched clusters Shodan API key is required."
-                                      " Either pass as a CLI argument or input the API key at config.config file.")
+@click.option("--shodan-vulns", "-sn", is_flag=True, help="To get vulnerabilities of matched clusters Shodan API key "
+                                                          "is required. Insert the Shodan key in config.config file, "
+                                                          "and pass this flag.")
 @click.option("--silent", is_flag=True, help="No terminal output.")
-def main(hosts_file, version_scan, patterns, match_against, size, output, format_, exclude_unmatched, include_geo,
-         processes, try_default, shodan, silent):
-    leak_finder = LeakFinder(hosts_file, version_scan, patterns, match_against, size, output, format_,
+def main(hosts_file, shodan_stream, version_scan, patterns, match_against, size, output, format_, exclude_unmatched,
+         include_geo,
+         processes, try_default, shodan_vulns, silent):
+    leak_finder = LeakFinder(hosts_file, shodan_stream, version_scan, patterns, match_against, size, output, format_,
                              exclude_unmatched, include_geo,
-                             processes, try_default, shodan, silent)
+                             processes, try_default, shodan_vulns, silent)
     leak_finder.wrapper()
 
 
