@@ -11,7 +11,7 @@ class Shodan:
     logger = logging.getLogger("urllib3.connectionpool")
     logger.setLevel(logging.ERROR)
 
-    def __init__(self, host):
+    def __init__(self, host=""):
         self.host = host
 
         self.api = None
@@ -32,6 +32,15 @@ class Shodan:
         if not self.api:
             self.cancel, self.error = True, True
 
+    def get_hostnames(self):
+        try:
+            ip_info = self.api.host(self.host)
+            return ip_info.get("hostnames")
+        except APIError as e:
+            if str(e) == "Invalid API key":
+                Shodan.log.error("Passed invalid Shodan API key.")
+                self.error = True
+
     def get_vulns(self):
         try:
             ip_info = self.api.host(self.host)
@@ -44,5 +53,4 @@ class Shodan:
     def stream(self):
         for banner in self.api.stream.ports([3006, 27017, 9200, 9042]):
             host, port = banner.get("ip_str"), banner.get("port")
-            if all((host, port)):
-                yield host, port
+            yield host, port
