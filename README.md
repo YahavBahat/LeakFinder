@@ -34,13 +34,21 @@ pip3 install requirements.txt
 ```
 
 ## 🎈 Usage <a name="usage"></a>
+
 Program supports the following Data Management System: Apache Cassandra, Elasticsearch, MongoDB, MySQL.
 Get help using
 ```
 python3 LeakFinder.py --help
 ```
 
-`--hosts-file` or `-h` is required.
+### Providing Hosts
+
+You can provide hosts using two mutually exclusive options: the `--hosts-file` or `-h` option, and the `--shodan-stream` or `-ss` option.
+As the name implies, with the `--hosts-file` argument, you will have to pass a file of hosts, separated by a newline each.
+
+The Streaming API is an HTTP-based service that returns a real-time stream of data collected by Shodan.
+Using the `--shodan-stream` or `-ss` uses the Shodan Stream API, which returns a real-time stream of data collected by Shodan.
+This option requires you to provide a Shodan API key in the `config.config` file.
 
 ### NMAP
 
@@ -98,10 +106,11 @@ It is possible to use multiprocessing and greatly speed-up the time execution of
 
 You can pass the `--silent` flag to turn off terminal output.
 
-### Vulnerability Scanning
+### Getting Host Vulnerabilities
 
-It is possible to scan the matched hosts/clusters for vulnerabilities using the Shodan API key. The query does **not** take scan or query credits.
-To pass the shodan API key one can either use the command-line argument `--shodan` or `-sn`, or alternatively put insert the API key in the `config.config` file, in the value of the `api` key.
+It is possible to getthe matched hosts'/clusters' for vulnerabilities using the Shodan API key. The query does **not** take scan or query credits.
+To pass the shodan API key needs to insert the API key in the `config.config` file, in the value of the `api` key.
+Afterwards, pass the `--shodan-vulns` or `-sv` flag to enable the feature.
 
 
 `config.config` example file:
@@ -122,7 +131,7 @@ python LeakFinder.py -h hosts.txt --patterns my_patterns.txt --size '{"smaller":
 - [x] Add an option to exclude unmatched clusters.
 - [x] Get vulnerabilities using Shodan API.
 - [x] Disable module API logging.
-- [ ] Continuously get a stream of hosts from Shodan Stream API.
+- [x] Continuously get a stream of hosts from Shodan Stream API.
 - [ ] If authentication fails:
    - [x] (MYSQL/CASSANDRA) Authenticate with a default password.
    - [ ] Add an option to brute force from a wordlist.
