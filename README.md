@@ -46,7 +46,7 @@ python3 LeakFinder.py --help
 You can provide hosts using either one of the two mutually exclusive options: the `--hosts-file` or `-h` option, and the `--shodan-stream` or `-ss` option.
 As the name implies, with the `--hosts-file` argument, you will have to pass a file of hosts, separated by a newline each.
 
-Using the `--shodan-stream` or `-ss` uses the Shodan Stream API, which returns a real-time stream of data collected by Shodan.
+Using the `--shodan-stream` or `-ss` option uses the Shodan Stream API, which returns a real-time stream of data collected by Shodan.
 This option requires you to provide a Shodan API key in the `config.config` file.
 
 ### NMAP
