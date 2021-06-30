@@ -1,5 +1,5 @@
 from json import loads
-from re import compile, error, Match
+from re import compile, error, Match, IGNORECASE
 
 
 def concat_generators(*args):
@@ -57,7 +57,7 @@ class Filter:
             match_against_gen = self.match_against_manager()
             for text in match_against_gen:
                 for pattern in self.pattern_gen():
-                    if isinstance(pattern.search(text), Match):
+                    if isinstance(pattern.search(text, IGNORECASE), Match):
                         self.matches.append(text)
                         self.pattern_match = True
             # If  self.pattern_match didn't change it didn't match
