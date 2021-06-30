@@ -1,8 +1,9 @@
 from mysql.connector import (connection)
 from mysql.connector import Error as MySQLError
 from mysql.connector import errorcode
+from Logging import no_connection
 import logging
-from Logging import log_setup, successfully_authenticated
+from Logging import log_setup
 
 
 # TODO: remove parameters user and password and add option to try to connect with default password
@@ -61,7 +62,7 @@ class MySQL:
 
             else:
                 self.error = True
-            MySQL.log.info(f"Couldn't establish connection for {self.host}\n")
+            no_connection(self.host)
 
     def list_database_names(self):
         self.cursor.execute("SHOW DATABASES;")
