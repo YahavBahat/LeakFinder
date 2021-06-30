@@ -64,13 +64,23 @@ class Output(object):
             key = Text(key)
             key.stylize("bold")
             if str(key) == "Vulnerabilities":
-                value = value[:30]
+                if len(value) > 30:
+                    value = value[:30]
+                value = ', '.join(value)
+            elif str(key) == "Hostnames":
+                if len(value) > 3:
+                    value = value[:3]
                 value = ', '.join(value)
             Output.console.print(key + f": {value}\n")
 
     def get_data_to_write(self):
-        data = {"Host": self.info.get("host"), "Port": self.info.get("port"),
-                "Cluster Size": human_readable_size(self.info.get("cluster_size")), "Module": self.info.get("module")}
+        data = {"Host": self.info.get("host"), "Port": self.info.get("port")}
+
+        hostnames = self.info.get("hostnames")
+        if hostnames:
+            data["Hostnames"] = hostnames
+
+        data.update({"Cluster Size": human_readable_size(self.info.get("cluster_size")), "Module": self.info.get("module")})
 
         if self.info.get("matches"):
             matches = self.info.get("matches")[:30]
