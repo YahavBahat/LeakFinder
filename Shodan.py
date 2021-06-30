@@ -51,6 +51,9 @@ class Shodan:
                 self.error = True
 
     def stream(self):
-        for banner in self.api.stream.ports([3006, 27017, 9200, 9042]):
-            host, port = banner.get("ip_str"), banner.get("port")
-            yield host, port
+        try:
+            for banner in self.api.stream.ports([3006, 27017, 9200, 9042]):
+                host, port = banner.get("ip_str"), banner.get("port")
+                yield host, port
+        except Exception as e:
+            Shodan.log.error(f"Shodan Stream: SOMETHING WENT WRONG.\n{e}\n")

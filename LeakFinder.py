@@ -9,6 +9,9 @@ from Logging import log_setup
 from concurrent.futures import ProcessPoolExecutor
 from Shodan import Shodan
 import nmap3
+from urllib3.exceptions import ProtocolError
+from requests.exceptions import ChunkedEncodingError
+from http.client import IncompleteRead
 
 
 def return_matched_against(matched_against_dict):
@@ -40,7 +43,7 @@ class LeakFinder:
 
         self.host, self.port = None, None
         self.cluster_instance, self.filter_instance = None, None
-        self.module_name = None
+        # self.module_name = None
 
     def yieldConnectionTuple(self):
         if self.hosts_file:
@@ -54,8 +57,7 @@ class LeakFinder:
 
     def get_service(self):
         try:
-            results = LeakFinder.nmap.scan_top_ports(self.host, args=f"-sV -Pn -p {self.port}")
-            return results.get(self.host).get("ports")[0].get("service").get("product")
+            return LeakFinder.nmap.scan_top_ports(self.host, args=f"-sV -Pn -p {self.port}").get(self.host).get("ports")[0].get("service").get("product")
         except Exception:
             pass
 
@@ -92,7 +94,7 @@ class LeakFinder:
         self.cluster_instance.get_total_size()
 
     # Returns a dictionary for class Output
-    def info_builder(self):
+    def info_builder(self, module_name):
         s = Shodan(self.host)
 
         info = {"host": self.host, "port": self.port}
@@ -103,14 +105,14 @@ class LeakFinder:
             info["hostnames"] = hostnames
 
         info.update({"cluster_size": self.cluster_instance.cluster_size,
-                     "module": self.module_name})
+                     "module": module_name})
 
         if self.filter_instance.pattern_match:
             info["matches"] = self.filter_instance.matches
         info["matched_against"] = return_matched_against({"regex_match": self.filter_instance.pattern_match,
                                                           "size_match": self.filter_instance.size_match})
 
-        if self.module_name in ("Cassandra", "MySQL") and self.cluster_instance.login_credentials:
+        if module_name in ("Cassandra", "MySQL") and self.cluster_instance.login_credentials:
             info["login_credentials"] = str(self.cluster_instance.login_credentials).replace("{", "").replace("}", "")
 
         if (any((self.filter_instance.size_match, self.filter_instance.pattern_match))
@@ -122,16 +124,22 @@ class LeakFinder:
 
     def main(self, connection_tuple):
         self.host, self.port = connection_tuple
+
         self.port = str(self.port)
-        cluster_obj, self.module_name = self.get_cluster_object()
+
+        cluster_obj, module_name = self.get_cluster_object()
+
         self.cluster_instance = cluster_obj(self.host, self.port, self.try_default)
+
         if not self.cluster_instance.error:
             self.cluster_method_manager()
             self.filter_instance = Filter(self.cluster_instance, self.patterns, self.match_against, self.size)
+
             if not self.exclude_unmatched or any(
                     (self.filter_instance.pattern_match, self.filter_instance.size_match)
             ):
-                Output(self.info_builder(), f"OUTPUT {LeakFinder.filename}", self.output, self.format_,
+
+                Output(self.info_builder(module_name), f"OUTPUT {LeakFinder.filename}", self.output, self.format_,
                        self.exclude_unmatched, self.include_geo, self.silent)
 
     def wrapper(self):
@@ -141,8 +149,13 @@ class LeakFinder:
             valid_file(self.patterns, "patterns", LeakFinder.log)
 
         with ProcessPoolExecutor(self.processes) as executor:
-            for connection_tuple in self.yieldConnectionTuple():
-                executor.submit(self.main, connection_tuple)
+            try:
+                for connection_tuple in self.yieldConnectionTuple():
+                    executor.submit(self.main, connection_tuple)
+            except (ProtocolError, ChunkedEncodingError, IncompleteRead, ValueError):
+                if self.shodan_stream:
+                    LeakFinder.log.error(f"Shodan Stream: SOMETHING WENT WRONG. Retrying...\n")
+                    self.wrapper()
 
 
 @command()
