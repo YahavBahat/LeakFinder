@@ -43,7 +43,7 @@ python3 LeakFinder.py --help
 
 ### Providing Hosts
 
-You can provide hosts using two mutually exclusive options: the `--hosts-file` or `-h` option, and the `--shodan-stream` or `-ss` option.
+You can provide hosts using either one of the two mutually exclusive options: the `--hosts-file` or `-h` option, and the `--shodan-stream` or `-ss` option.
 As the name implies, with the `--hosts-file` argument, you will have to pass a file of hosts, separated by a newline each.
 
 The Streaming API is an HTTP-based service that returns a real-time stream of data collected by Shodan.
