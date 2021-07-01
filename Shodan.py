@@ -52,7 +52,7 @@ class Shodan:
 
     def stream(self):
         try:
-            for banner in self.api.stream.ports([3006, 27017, 9200, 9042]):
+            for banner in self.api.stream.ports([3306, 27017, 9200, 9042]):
                 host, port = banner.get("ip_str"), banner.get("port")
                 yield host, port
         except Exception as e:
